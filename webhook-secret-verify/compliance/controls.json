@@ -1,0 +1,100 @@
+{
+  "brick_name": "telegram-webhook-secret-verify",
+  "version": "0.1.0",
+  "category": "F-Integrations",
+  "le_go_principles": ["zero-trust", "fail-closed", "input-validation"],
+  "compliance": {
+    "gdpr": [
+      "art.5.1.f-integrity-confidentiality",
+      "art.32.1.b-resilience"
+    ],
+    "owasp": [
+      "A07-identification-auth-failures",
+      "A03-injection",
+      "A08-software-data-integrity-failures"
+    ]
+  },
+  "depends_on": [],
+  "tenant_scoped": false,
+  "donor": {
+    "primary": "/Users/mba/Sviluppo/erp/gomyreference/supabase/functions/goref-telegram-webhook/index.ts",
+    "bot_username": "@go_your_relationship_bot",
+    "score_match": 0.92
+  },
+  "lessons_addressed": [
+    {
+      "id": "GOAI-LESSON-12",
+      "title": "Telegram webhook richiede --no-verify-jwt + secret token",
+      "incident_reference": "Setup webhook iniziali — Telegram non manda Bearer JWT",
+      "implementation_files": [
+        "helpers/verify-secret-token.ts",
+        "helpers/healthcheck-handler.ts"
+      ]
+    },
+    {
+      "id": "GOAI-LESSON-AllowedUpdates",
+      "title": "Telegram allowed_updates di default ESCLUDE callback_query",
+      "incident_reference": "GoNetworker 18/05/2026 — bottoni inline silenziosamente morti",
+      "implementation_files": ["helpers/allowed-update-types.ts"]
+    }
+  ],
+  "controls_detail": [
+    {
+      "id": "OWASP-A07",
+      "control_type": "authentication",
+      "mapping": "Webhook secret token verificato con constant-time compare. Fail-closed su secret env vuoto o header assente. Previene impersonation (chiunque conosca l'URL della edge fn webhook ma non il secret non può inviare update spoofati).",
+      "implementation_files": ["helpers/verify-secret-token.ts"]
+    },
+    {
+      "id": "OWASP-A03",
+      "control_type": "input_validation",
+      "mapping": "parseUpdate valida: body non vuoto, dimensione sotto soglia (default 1 MB), JSON parsabile, struttura minima `{ update_id: number }`. Tutto il resto è tipato `TgUpdate` per narrowing safe lato consumer (no `any`).",
+      "implementation_files": ["helpers/parse-update.ts", "types.ts"]
+    },
+    {
+      "id": "OWASP-A08",
+      "control_type": "data_integrity",
+      "mapping": "isAllowedUpdate filtra gli update types alla whitelist canonical. Update non whitelist vengono ignorati silenziosamente (200 OK lato Telegram per non accumulare retry quota) ma NON entrano nel business handler.",
+      "implementation_files": ["helpers/allowed-update-types.ts"]
+    },
+    {
+      "id": "GDPR-5.1.f",
+      "control_type": "integrity_confidentiality",
+      "mapping": "Constant-time compare previene timing side-channel attack che permetterebbe a un attaccante remoto di scoprire byte-by-byte il secret token.",
+      "implementation_files": ["helpers/verify-secret-token.ts"]
+    }
+  ],
+  "anti_patterns_explicitly_avoided": [
+    {
+      "anti_pattern": "if (header === expected) { ... }",
+      "why_bad": "Comparazione character-by-character vulnerabile a timing attack: l'attaccante misura il tempo di risposta per scoprire prefix corretto byte-by-byte.",
+      "replacement": "constantTimeEqual() con XOR aggregate su lunghezza max"
+    },
+    {
+      "anti_pattern": "if (!header) accept(); // dev mode",
+      "why_bad": "Fail-open: se per qualsiasi motivo il secret env non è settato, il webhook accetta qualsiasi update spoofato.",
+      "replacement": "Fail-closed: secret env vuoto → false sempre"
+    },
+    {
+      "anti_pattern": "const upd = await req.json() as any",
+      "why_bad": "Nessuna validazione di struttura/dimensione. Un attaccante può inviare body random / enorme e crashare la fn.",
+      "replacement": "parseUpdate() con limite size + struttura minima + tipi narrow"
+    }
+  ],
+  "test_evidence_required": [
+    "verifySecretToken con expectedSecret='' → false (fail-closed)",
+    "verifySecretToken senza header X-Telegram-Bot-Api-Secret-Token → false",
+    "verifySecretToken con secret corretto → true",
+    "verifySecretToken con secret sbagliato → false",
+    "constantTimeEqual: tempo identico per ('abcde', 'abcdf') vs ('abcde', 'fbcde')",
+    "parseUpdate body vuoto → {ok:false, error:'empty_body'}",
+    "parseUpdate body non-JSON → {ok:false, error:'invalid_json'}",
+    "parseUpdate body senza update_id → {ok:false, error:'missing_update_id'}",
+    "parseUpdate body > 1 MB → {ok:false, error:'body_too_large'}",
+    "parseUpdate body valido → {ok:true, update: TgUpdate}",
+    "isAllowedUpdate(callback_query, CANONICAL) → true",
+    "isAllowedUpdate(channel_post, CANONICAL) → false",
+    "isHealthcheckRequest GET → true",
+    "isHealthcheckRequest POST → false"
+  ]
+}

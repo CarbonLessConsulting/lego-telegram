@@ -1,0 +1,134 @@
+{
+  "brick_name": "telegram-voice-capture-whisper",
+  "version": "0.1.0",
+  "category": "E-Media",
+  "le_go_principles": ["data-minimization", "cost-transparency", "soft-no-throw"],
+  "compliance": {
+    "gdpr": ["art.5-minimization", "art.9-special-categories-voice", "art.32-security", "art.30-records"],
+    "ai_act": ["art.10-data-quality", "art.13-transparency"]
+  },
+  "depends_on": ["telegram-push-soft"],
+  "tenant_scoped": false,
+  "controls": [
+    {
+      "id": "GDPR-5.1.c",
+      "framework": "GDPR Reg. UE 2016/679",
+      "article": "Art. 5 §1 lett. c — Minimizzazione dei dati",
+      "control_type": "data_minimization",
+      "mapping": "Audio raw NON persistito. Trascrizione testuale NON loggata in audit. Solo metriche tecniche (duration_sec, language, cost_usd, transcription_length) per usage tracking. La trascrizione viaggia solo verso il consumer del brick (es. tool calling Sofia) che decide se persisterla con base giuridica adeguata.",
+      "implementation_files": ["index.ts", "helpers/persist-audit.ts"]
+    },
+    {
+      "id": "GDPR-9.1",
+      "framework": "GDPR Reg. UE 2016/679",
+      "article": "Art. 9 §1 — Categorie particolari di dati personali (voce come dato biometrico)",
+      "control_type": "special_categories_handling",
+      "mapping": "La voce e' un dato biometrico potenziale (timbro, accento). Il brick NON persiste l'audio, lo passa a Whisper (subprocessor: OpenAI, contratto DPA standard) e lo dimentica. Nessun voiceprint estratto. Trascrizione testuale e' dato personale standard art. 4 §1, non art. 9.",
+      "implementation_files": ["index.ts", "helpers/transcribe-whisper.ts"]
+    },
+    {
+      "id": "GDPR-32.1.b",
+      "framework": "GDPR Reg. UE 2016/679",
+      "article": "Art. 32 §1 lett. b — Capacita' di assicurare disponibilita' e resilienza",
+      "control_type": "resilience",
+      "mapping": "Retry x3 su transient Whisper (429, 5xx) con backoff 400ms/1200ms/2400ms. Soft no-throw helpers: un fail di OpenAI non corrompe lo stato DB del consumer.",
+      "implementation_files": ["helpers/transcribe-whisper.ts"]
+    },
+    {
+      "id": "GDPR-30.1",
+      "framework": "GDPR Reg. UE 2016/679",
+      "article": "Art. 30 §1 — Registri delle attivita' di trattamento",
+      "control_type": "record_keeping",
+      "mapping": "Audit callback consente al consumer di registrare ogni trascrizione (timestamp, durata, lingua, costo) senza esporre contenuto. Compliance-ready per registro art. 30.",
+      "implementation_files": ["helpers/persist-audit.ts"]
+    },
+    {
+      "id": "AI-ACT-13",
+      "framework": "AI Act UE 2024/1689",
+      "article": "Art. 13 — Trasparenza verso gli utenti dei sistemi AI",
+      "control_type": "transparency",
+      "mapping": "Il modello (whisper-1) e provider (OpenAI) sono esposti nel result + audit. Il consumer puo' comunicare all'utente quale AI processa la voce. Costo esposto in USD per trasparenza economica.",
+      "implementation_files": ["index.ts", "helpers/transcribe-whisper.ts"]
+    },
+    {
+      "id": "LE-GO-PRINCIPLE-7",
+      "framework": "le-GO SECURITY_PILLAR",
+      "article": "Principio 7 — Soft helper no-throw",
+      "control_type": "integrity",
+      "mapping": "captureVoice + tutti gli helper interni MAI throw. Ritornano sempre risultato strutturato { ok: true/false, ... }. Una edge fn chiamante non muore a meta' pipeline → stato DB resta coerente. Implementa lezione globale #14.",
+      "implementation_files": ["index.ts", "helpers/download-voice.ts", "helpers/transcribe-whisper.ts", "helpers/persist-audit.ts"]
+    },
+    {
+      "id": "LE-GO-COST-TRANSPARENCY",
+      "framework": "le-GO Principles",
+      "article": "Cost transparency by design",
+      "control_type": "economic_transparency",
+      "mapping": "Costo USD calcolato per ogni trascrizione (pricing ufficiale OpenAI $0.006/min) ed esposto nel result + audit. Consente budget capping + chargeback per tenant.",
+      "implementation_files": ["helpers/transcribe-whisper.ts"]
+    },
+    {
+      "id": "GOAI-LESSON-14",
+      "framework": "GOAi lezioni critiche (~/.claude/CLAUDE.md)",
+      "article": "Lezione #14 — Helper sendMessage Telegram MAI throw",
+      "control_type": "design_pattern",
+      "mapping": "Stesso pattern applicato a tutti gli helper Telegram + OpenAI di questo brick. Soft fail su qualsiasi errore.",
+      "implementation_files": ["helpers/download-voice.ts", "helpers/transcribe-whisper.ts"]
+    },
+    {
+      "id": "ANTI-HALLUCINATION",
+      "framework": "GOAi quality controls",
+      "article": "Whisper hallucination patterns (Amara closing cards, music tags)",
+      "control_type": "input_validation",
+      "mapping": "looksLikeHallucination() filtra pattern noti di hallucination Whisper su audio brevi/silenziosi. Audio < 10 char trascritti trattati come empty. 9 regex pattern donor-derived.",
+      "implementation_files": ["helpers/transcribe-whisper.ts"]
+    }
+  ],
+  "anti_patterns_explicitly_avoided": [
+    {
+      "donor": "GOMAPLAB legacy patterns",
+      "anti_pattern": "throw new Error su Whisper 4xx/5xx",
+      "why_bad": "Edge fn chiamante muore a meta'. Stato DB inconsistente.",
+      "replacement": "Ritorno soft { ok: false, reason, detail }"
+    },
+    {
+      "donor": "generic",
+      "anti_pattern": "Persistere audio raw su Storage per debugging",
+      "why_bad": "Viola GDPR art. 5 minimization. La voce e' dato biometrico potenziale.",
+      "replacement": "Solo metriche tecniche in audit, audio dimenticato post-trascrizione"
+    },
+    {
+      "donor": "generic",
+      "anti_pattern": "Loggare il testo trascritto nell'audit",
+      "why_bad": "Viola GDPR art. 5 minimization (audit ha base giuridica diversa dal consumer).",
+      "replacement": "Solo char count nell'audit. Testo va al consumer per base giuridica esplicita."
+    }
+  ],
+  "test_evidence_required": [
+    "Test unit: captureVoice con botToken vuoto → { ok: false, reason: 'invalid_config' }, no throw",
+    "Test unit: captureVoice con openaiApiKey vuoto → { ok: false, reason: 'invalid_config' }, no throw",
+    "Test unit: voice.duration=120s, maxDuration=60 → { ok: false, reason: 'duration_exceeded' }",
+    "Test mock: Telegram getFile 4xx → { ok: false, reason: 'download_failed' }",
+    "Test mock: Whisper 429 x3 → retry, poi { ok: false, reason: 'transcription_failed' }",
+    "Test mock: Whisper risponde 'amara.org' → { ok: false, reason: 'empty_transcription', detail: 'hallucination_detected' }",
+    "Test unit: computeWhisperCostUsd(60) === 0.006 (1 min)",
+    "Test unit: computeWhisperCostUsd(30) === 0.003 (30 sec)",
+    "Test unit: normalizeLanguage('italian') === 'it'",
+    "Test unit: normalizeLanguage('IT') === 'it'",
+    "Test mock: auditCallback throw → brick continua, ritorna ok comunque",
+    "Test compliance: audit entry NON contiene la trascrizione (solo length)"
+  ],
+  "pricing_reference": {
+    "model": "whisper-1",
+    "price_usd_per_minute": 0.006,
+    "source": "https://openai.com/pricing",
+    "verified_at": "2026-05-23",
+    "billing_unit": "per second, rounded up"
+  },
+  "donor_files": {
+    "primary": "/Users/mba/Sviluppo/erp/gomyreference/supabase/functions/goref-capture-voice/index.ts",
+    "primary_helpers": [
+      "/Users/mba/Sviluppo/erp/gomyreference/supabase/functions/_shared/whisper.ts",
+      "/Users/mba/Sviluppo/erp/gomyreference/supabase/functions/_shared/telegram.ts"
+    ]
+  }
+}

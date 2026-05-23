@@ -1,0 +1,60 @@
+{
+  "name": "@goai/lego-telegram",
+  "version": "0.1.0",
+  "license": "MIT",
+  "exports": {
+    ".": "./mod.ts",
+    "./push-soft": "./push-soft/index.ts",
+    "./webhook-secret-verify": "./webhook-secret-verify/index.ts",
+    "./voice-capture-whisper": "./voice-capture-whisper/index.ts",
+    "./photo-ocr-vision": "./photo-ocr-vision/index.ts",
+    "./inline-menu-callback": "./inline-menu-callback/index.ts",
+    "./i18n-core": "./i18n-core/index.ts",
+    "./state-machine-capture": "./state-machine-capture/index.ts",
+    "./cost-meter-per-model": "./cost-meter-per-model/index.ts",
+    "./white-label-runtime": "./white-label-runtime/index.ts",
+    "./contact-upsert-fuzzy": "./contact-upsert-fuzzy/index.ts",
+    "./crm-prefetch-lookup": "./crm-prefetch-lookup/index.ts",
+    "./entity-flow-framework": "./entity-flow-framework/index.ts",
+    "./bot-snapshot-test": "./bot-snapshot-test/index.ts"
+  },
+  "publish": {
+    "include": [
+      "mod.ts",
+      "*/index.ts",
+      "*/types.ts",
+      "*/helpers/**",
+      "*/policies/**",
+      "*/prompts/**",
+      "*/templates/**",
+      "*/components/**",
+      "*/hooks/**",
+      "*/lib/**",
+      "*/flows/**",
+      "*/locales/**",
+      "*/README.md",
+      "*/compliance/controls.json",
+      "*/db/migration-template.sql",
+      "README.md",
+      "LICENSE",
+      "CHANGELOG.md"
+    ],
+    "exclude": [
+      ".git",
+      ".github",
+      "node_modules"
+    ]
+  },
+  "tasks": {
+    "check": "deno check **/*.ts",
+    "fmt": "deno fmt",
+    "lint": "deno lint",
+    "publish:dry": "deno publish --dry-run --allow-dirty"
+  },
+  "lint": {
+    "exclude": [".git", "node_modules"]
+  },
+  "fmt": {
+    "exclude": [".git", "node_modules"]
+  }
+}

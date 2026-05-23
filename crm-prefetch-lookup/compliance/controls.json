@@ -1,0 +1,50 @@
+{
+  "brick_name": "telegram-crm-prefetch-lookup",
+  "version": "0.1.0",
+  "category": "I-Domain",
+  "le_go_principles": [
+    "data-minimization",
+    "cost-transparency",
+    "soft-helper-no-throw"
+  ],
+  "compliance": {
+    "gdpr": [
+      "art.5.1.c.minimization",
+      "art.6.1.f.legitimate_interest",
+      "art.32.1.b.confidentiality_integrity"
+    ],
+    "owasp": [
+      "A03.injection.input_validation",
+      "A04.insecure_design.tenant_scoping"
+    ]
+  },
+  "depends_on": [
+    "telegram-contact-upsert-fuzzy",
+    "audit-log-immutable",
+    "rls-multitenant"
+  ],
+  "depends_on_optional": [
+    "sofia-prompt-injection-guard"
+  ],
+  "tenant_scoped": true,
+  "consumers_typical": [
+    "telegram-webhook (chiamato pre-Sofia turn)",
+    "sofia-dispatcher (per produrre context preloaded)"
+  ],
+  "security_baseline": {
+    "auth_2fa_no_magiclink": "N/A",
+    "rls_4_policy": "consumer responsabile (filter tenant_id obbligatorio)",
+    "audit_log_immutable": "privacy-safe (no PII payload)",
+    "encryption_at_rest": "ereditato",
+    "rate_limit": "clamp max_candidates 1..20",
+    "prompt_injection_guard": "raccomandato wrapping user_message PRIMA di extractCandidates"
+  },
+  "tested": false,
+  "extracted_from": [
+    "gosolution/supabase/functions/gomec-telegram-webhook/entities/_shared.ts (searchClienti)",
+    "gosolution/supabase/functions/gomec-telegram-webhook/entities/crm.ts (CRM ILIKE multi-column pattern)"
+  ],
+  "extracted_at": "2026-05-23",
+  "obligatorio_per_ogni_prodotto_le_GO": false,
+  "note": "Pattern verticale per bot di tipo telegram-bot-product-master (CRM-heavy). Riduce cost+latency Sofia eliminando round-trip tool call separato per ogni lookup CRM."
+}

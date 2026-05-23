@@ -1,0 +1,36 @@
+{
+  "brick_name": "telegram-cost-meter-per-model",
+  "version": "0.1.0",
+  "category": "G-Ops",
+  "le_go_principles": ["transparency", "observability", "no-throw"],
+  "compliance": {
+    "gdpr": [
+      "art.5-transparency (per-call ledger esposto via view summary)",
+      "art.32-security (RLS strict + service_role bypass)"
+    ],
+    "eu_ai_act": [
+      "art.13-transparency (cost_usd + model loggati per ogni chiamata)",
+      "art.15-accuracy (input_tokens + output_tokens + duration_ms tracked)"
+    ],
+    "iso27001": ["A.12.4.1-event-logging (ai_usage_logs append-only)"],
+    "owasp": ["A09-logging-failures (cost tracking baked-in per evitare blind LLM spend)"]
+  },
+  "depends_on": [],
+  "complementary_to": ["cost-meter-sofia"],
+  "differentiation": {
+    "cost-meter-sofia": "Cost cumulato per conversazione (cost_total_usd colonna su tabella conversations)",
+    "telegram-cost-meter-per-model": "Cost per-call ledger (ai_usage_logs append-only) con breakdown per modello/provider/operation"
+  },
+  "tenant_scoped": true,
+  "no_throw": true,
+  "fire_and_forget": "logUsage e' soft no-throw — errori del DB NON abortiscono la pipeline business",
+  "pii_handling": "no_pii_in_cost_records",
+  "portability": {
+    "no_hardcode_tenant_id": true,
+    "no_hardcode_project_ref": true,
+    "table_name_parametric": true,
+    "eur_usd_rate_env_configurable": true
+  },
+  "donor": "gomyreference/supabase/functions/_shared/usage-meter.ts + migrations/20260518100000_goref_ai_usage_logs.sql",
+  "extracted_at": "2026-05-23"
+}

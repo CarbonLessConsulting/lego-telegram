@@ -1,0 +1,90 @@
+{
+  "brick_name": "telegram-push-soft",
+  "version": "0.1.0",
+  "category": "F-Integrations",
+  "le_go_principles": ["resilience", "observability", "no-throw"],
+  "compliance": {
+    "gdpr": [
+      "art.5-minimization",
+      "art.5.1.f-integrity",
+      "art.32.1.b-resilience"
+    ],
+    "owasp": [
+      "A07-identification-auth-failures",
+      "A09-security-logging-failures"
+    ]
+  },
+  "depends_on": [],
+  "tenant_scoped": false,
+  "donor": {
+    "primary": "/Users/mba/Sviluppo/erp/gomyreference/supabase/functions/_shared/telegram.ts",
+    "bot_username": "@go_your_relationship_bot",
+    "score_match": 0.92
+  },
+  "lessons_addressed": [
+    {
+      "id": "GOAI-LESSON-14",
+      "title": "Helper sendMessage Telegram MAI throw",
+      "incident_reference": "Onboarding goref Ersilia 21/05/2026 (4h debug)",
+      "implementation_files": [
+        "helpers/send-message.ts",
+        "helpers/send-photo.ts",
+        "helpers/send-document.ts",
+        "helpers/send-chat-action.ts",
+        "helpers/edit-message.ts",
+        "helpers/answer-callback.ts"
+      ]
+    },
+    {
+      "id": "GOAI-LESSON-7",
+      "title": "Surrogate orfano UTF-16 (no slice raw su emoji)",
+      "implementation_files": ["helpers/chunk-html.ts"]
+    }
+  ],
+  "controls_detail": [
+    {
+      "id": "GDPR-5.1.f",
+      "control_type": "integrity",
+      "mapping": "Il pattern soft-helper garantisce che un fallimento del canale di notifica (Telegram API down, rate-limit, bot bloccato dall'utente) NON corrompa lo stato dati del titolare/responsabile. La transazione DB resta coerente anche in presenza di errori del subprocessor (Telegram Bot API).",
+      "implementation_files": ["helpers/send-message.ts", "helpers/send-photo.ts", "helpers/send-document.ts"]
+    },
+    {
+      "id": "GDPR-32.1.b",
+      "control_type": "resilience",
+      "mapping": "Retry x3 su transient (429, 5xx) con backoff esponenziale + jitter preserva la disponibilità anche durante incident upstream Telegram. Log strutturato su fail finale consente recovery manuale.",
+      "implementation_files": ["helpers/send-message.ts", "helpers/retry-policy.ts"]
+    },
+    {
+      "id": "OWASP-A09",
+      "control_type": "observability",
+      "mapping": "console.warn/error strutturato su ogni retry e fail finale (chat_id, attempt, tg_error_code, description). Mai PII del body messaggio nei log.",
+      "implementation_files": ["helpers/send-message.ts"]
+    }
+  ],
+  "anti_patterns_explicitly_avoided": [
+    {
+      "donor_alt": "GOMAPLAB/supabase/functions/_shared/telegram.ts",
+      "line": 55,
+      "anti_pattern": "throw new Error(`Telegram API ${resp.status}: ${errText}`)",
+      "why_bad": "Lancia eccezione su errori non-429. La edge fn chiamante muore a metà → stato DB inconsistente. Viola lezione #14.",
+      "replacement": "Ritorno soft {ok:false, error_code, description, http_status}"
+    },
+    {
+      "donor_alt": "goyouravatar/supabase/functions/goyouravatar-webhook/telegram_notify.ts",
+      "line": 23,
+      "anti_pattern": "throw new Error(`telegram sendMessage ${res.status}: ${txt}`)",
+      "why_bad": "Helper riusato in altri contesti avrebbe rotto stato.",
+      "replacement": "Ritorno soft + log strutturato"
+    }
+  ],
+  "test_evidence_required": [
+    "sendMessage con botToken vuoto → {ok:false, error:'empty_bot_token'}, no throw",
+    "sendMessage con chatId=0 → {ok:false, error:'invalid_chat_id'}, no throw",
+    "sendMessage mock 3x risposta 429 → 3 retry con backoff, poi {ok:false, error_code:429}",
+    "sendMessage mock risposta 403 (bot bloccato) → no retry, immediato {ok:false, error_code:403}",
+    "sendMessage chunking testo 8000 char → 2 chunk, reply_markup solo sull'ultimo",
+    "sendChatAction → 1 tentativo, no retry, ok su 200",
+    "editMessageText con 'message is not modified' → {ok:true} (no-op success)",
+    "answerCallbackQuery → toast troncato a 200 char"
+  ]
+}

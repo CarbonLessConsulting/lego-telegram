@@ -1,0 +1,34 @@
+{
+  "brick": "telegram-white-label-runtime",
+  "version": "0.1.0",
+  "category": "C-UI",
+  "compliance_controls": [
+    "GDPR.art.5.1.c.data_minimization",
+    "GDPR.art.13.transparency_branding",
+    "le-GO.principio.7.soft_helper_no_throw"
+  ],
+  "security_baseline": {
+    "auth_2fa_no_magiclink": "N/A (brick runtime UI/messaging)",
+    "rls_4_policy": "N/A (lettura tenant-scoped via service_role da edge fn)",
+    "audit_log_immutable": "N/A (no scrittura DB nel brick)",
+    "encryption_at_rest": "ereditato da Supabase (brand_config JSONB)",
+    "rate_limit": "cache TTL 5min mitiga thundering herd",
+    "prompt_injection_guard": "N/A (template interpolation `{{var}}` non valuta espressioni)"
+  },
+  "depends_on": [
+    "brand-white-label"
+  ],
+  "consumers_typical": [
+    "telegram-webhook (qualsiasi bot agency)",
+    "PWA companion (CSS vars via generateCssVars)"
+  ],
+  "tested": false,
+  "extracted_from": [
+    "gomyreference (goref_tenants.brand_config + _shared/tenant.ts + _shared/i18n.ts interpolate pattern)",
+    "gocotech-website src/lib/brand-config.ts (toHslVar)",
+    "gocotech-website src/le-go/brand-white-label (estensione Telegram-side)"
+  ],
+  "extracted_at": "2026-05-23",
+  "obligatorio_per_ogni_prodotto_le_GO": false,
+  "note": "Estensione Telegram-side del brick brand-white-label React. Riusa types dove possibile, aggiunge welcome_template + signature + locale_default + cta_url specifici per bot."
+}

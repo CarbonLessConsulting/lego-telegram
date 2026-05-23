@@ -1,0 +1,22 @@
+# Deno
+deno.lock
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+node_modules/
+dist/
+.next/
+
+# Env (no secrets in repo)
+.env
+.env.local
+*.local

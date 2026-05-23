@@ -1,0 +1,119 @@
+{
+  "brick_name": "telegram-inline-menu-callback",
+  "version": "0.1.0",
+  "category": "C-UI",
+  "le_go_principles": ["accessibility", "consistency", "no-throw"],
+  "compliance": {
+    "gdpr": [
+      "art.5.1.c-minimization",
+      "art.5.1.f-integrity"
+    ],
+    "owasp": [
+      "A01-broken-access-control-namespace-isolation",
+      "A03-injection-callback-payload-validation",
+      "A04-insecure-design-soft-fail",
+      "A09-security-logging-failures"
+    ]
+  },
+  "depends_on": ["telegram-push-soft"],
+  "tenant_scoped": false,
+  "donor": {
+    "primary": "/Users/mba/Sviluppo/erp/gomyreference/supabase/functions/goref-telegram-webhook/index.ts",
+    "secondary": "/Users/mba/Sviluppo/erp/gosolution/supabase/functions/gomec-telegram-webhook/",
+    "bot_username": "@go_your_relationship_bot",
+    "score_match": 0.92
+  },
+  "lessons_addressed": [
+    {
+      "id": "GOAI-LESSON-14",
+      "title": "Helper Telegram MAI throw — dispatcher soft-catch + answer-callback no-throw",
+      "implementation_files": [
+        "helpers/handle-callback.ts",
+        "helpers/answer-callback.ts",
+        "helpers/update-message-with-menu.ts"
+      ]
+    },
+    {
+      "id": "GOAI-LESSON-7",
+      "title": "Surrogate orfano UTF-16 — encode/truncate per code point",
+      "implementation_files": [
+        "helpers/encode-callback-data.ts",
+        "helpers/answer-callback.ts",
+        "helpers/build-keyboard.ts"
+      ]
+    },
+    {
+      "id": "TELEGRAM-ALLOWED-UPDATES",
+      "title": "allowed_updates DEVE includere callback_query (default Telegram esclude)",
+      "incident_reference": "Marco@Corsair 18/05/2026 — bottoni inline silenziosamente morti",
+      "implementation_files": ["README.md"],
+      "remediation_doc": "README sezione 'Setup webhook'"
+    }
+  ],
+  "controls_detail": [
+    {
+      "id": "OWASP-A03",
+      "control_type": "input_validation",
+      "mapping": "decode-callback-data valida namespace/action contro whitelist regex [a-zA-Z0-9_-]{1,32} prima del lookup in registry. Impedisce injection di chiavi handler arbitrarie o caratteri di controllo.",
+      "implementation_files": ["helpers/decode-callback-data.ts"]
+    },
+    {
+      "id": "OWASP-A04",
+      "control_type": "secure_design",
+      "mapping": "Dispatcher soft-catch: throw dell'handler vengono catturati, loggati con stack truncato a 500 char, e il webhook resta vivo. Lo stato DB del chiamante non rollbacka per fallimento UI.",
+      "implementation_files": ["helpers/handle-callback.ts"]
+    },
+    {
+      "id": "OWASP-A09",
+      "control_type": "observability",
+      "mapping": "console.warn/error strutturato su decode_failed, unknown_action, handler_threw, before/after_dispatch_threw. Mai PII utente nei log (solo callback_query_id, raw_data troncato, action_key).",
+      "implementation_files": [
+        "helpers/handle-callback.ts",
+        "helpers/answer-callback.ts",
+        "helpers/encode-callback-data.ts"
+      ]
+    },
+    {
+      "id": "TG-LIMIT-64",
+      "control_type": "platform_constraint",
+      "mapping": "callback_data hard-limited a 64 byte UTF-8. encode-callback-data verifica byte-length tramite TextEncoder, tronca per code point preservando emoji, ritorna flag truncated. Builder logga warn senza fallire (UX migliore di crash).",
+      "implementation_files": ["helpers/encode-callback-data.ts", "helpers/build-keyboard.ts"]
+    },
+    {
+      "id": "GDPR-5.1.c",
+      "control_type": "minimization",
+      "mapping": "Per payload grossi (testo libero, multi-arg) il brick raccomanda di salvare in DB e usare un id corto in callback_data — evita di trasportare PII inutile via callback_query.",
+      "implementation_files": ["README.md"]
+    }
+  ],
+  "anti_patterns_explicitly_avoided": [
+    {
+      "donor_alt": "gomaplab/supabase/functions/gmaplab-telegram-webhook/handlers/_callback.ts",
+      "anti_pattern": "if/else chain hardcoded su data.startsWith('approve:') / data.startsWith('reject:')",
+      "why_bad": "Non scala oltre 4-5 azioni; aggiungere una nuova action richiede edit centrale + rischio match prefisso ambiguo.",
+      "replacement": "Registry { 'gomec:approve': fn, 'gomec:reject': fn } + dispatcher handleCallback"
+    },
+    {
+      "donor_alt": "gonetworker-pwa/supabase/functions/gnet-webhook/index.ts",
+      "anti_pattern": "callback_data passato raw a SQL query come stringa",
+      "why_bad": "SQL injection / parsing crash. Telegram permette di forgiare callback_data arbitrari da Web App.",
+      "replacement": "decodeCallbackData → CallbackPayload tipato, args lasciati URL-decoded raw; sanitize a livello consumer"
+    }
+  ],
+  "test_evidence_required": [
+    "encodeCallbackData con args 200 char → truncated=true, bytes<=64",
+    "encodeCallbackData con namespace+action solo (no args) → truncated=false",
+    "encodeCallbackData con emoji nell'arg → no surrogate orfano (verify by length)",
+    "decodeCallbackData con string vuota → {ok:false, error:'empty_data'}",
+    "decodeCallbackData con 'foo' (no colon) → {ok:false, error:'missing_action'}",
+    "decodeCallbackData con 'foo;injection:bar' → {ok:false, error:'invalid_namespace'}",
+    "handleCallback con action sconosciuta → on_unknown chiamato + {ok:false, error:'unknown_action'}",
+    "handleCallback con handler che throw → dispatcher soft-catch, ritorna {ok:false}, webhook resta vivo",
+    "buildKeyboard().button().row().button().build() → 2 righe da 1 bottone",
+    "buildKeyboard con callback_data >64 byte → warn console + truncated, no throw",
+    "answerCallbackQuery con text 250 char → truncated a 200, no error",
+    "updateMessageWithMenu con stesso text+markup → 'message is not modified' → {ok:true, no_op:true}",
+    "pushMenuState x17 → MAX_DEPTH 16 mantenuto, oldest frame droppato",
+    "deserializeMenuState con JSON corrotto → {frames:[]} no throw"
+  ]
+}

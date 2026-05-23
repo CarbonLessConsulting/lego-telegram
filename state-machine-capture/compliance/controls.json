@@ -1,0 +1,34 @@
+{
+  "brick_name": "telegram-state-machine-capture",
+  "version": "0.1.0",
+  "category": "B-Sofia-Core",
+  "le_go_principles": ["portability", "no-throw", "observability"],
+  "compliance": {
+    "gdpr": [
+      "art.5.1.c-minimization (TTL 24h default, abandonExpiredDrafts cron)",
+      "art.5.1.e-storage-limitation (hard_delete option per GDPR cleanup)",
+      "art.17-right-to-erasure (CASCADE su tenant_id + owner_user_id)",
+      "art.32-security (RLS 4-policy strict + service_role bypass)"
+    ],
+    "iso27001": [
+      "A.12.4.1-event-logging (sources append-only audit trail)",
+      "A.9-access-control (RLS multi-tenant strict)"
+    ]
+  },
+  "depends_on": ["telegram-push-soft", "rls-multitenant", "multitenancy-bootstrap"],
+  "tenant_scoped": true,
+  "portability": {
+    "no_hardcode_tenant_id": true,
+    "no_hardcode_project_ref": true,
+    "no_hardcode_bot_username": true,
+    "table_name_parametric": true,
+    "rpc_name_parametric": true
+  },
+  "concurrency": {
+    "atomic_upsert_rpc": true,
+    "select_for_update": true,
+    "race_condition_resolved": "photo+voice paralleli"
+  },
+  "donor": "gomyreference/supabase/functions/_shared/draft.ts + migrations/20260518140000_goref_capture_drafts.sql + migrations/20260520080000_goref_draft_upsert_rpc.sql",
+  "extracted_at": "2026-05-23"
+}

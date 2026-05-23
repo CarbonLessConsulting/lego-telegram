@@ -1,0 +1,107 @@
+{
+  "brick_name": "telegram-i18n-core",
+  "version": "0.1.0",
+  "category": "C-UI",
+  "le_go_principles": ["accessibility", "consistency", "no-throw"],
+  "compliance": {
+    "gdpr": [
+      "art.12-transparency-mother-language",
+      "art.5.1.a-fairness"
+    ],
+    "owasp": [
+      "A03-injection-html-already-in-bundles",
+      "A04-insecure-design-soft-fail",
+      "A09-security-logging-failures"
+    ],
+    "wcag": [
+      "3.1.1-language-of-page",
+      "3.1.2-language-of-parts"
+    ]
+  },
+  "depends_on": [],
+  "tenant_scoped": false,
+  "donor": {
+    "primary": "/Users/mba/Sviluppo/erp/gomyreference/supabase/functions/_shared/i18n.ts",
+    "bot_username": "@go_your_relationship_bot",
+    "score_match": 0.95
+  },
+  "lessons_addressed": [
+    {
+      "id": "GOAI-LESSON-14",
+      "title": "Helper i18n MAI throw — chiave mancante = log warn + return key",
+      "implementation_files": ["helpers/t.ts", "helpers/format-currency.ts", "helpers/format-date.ts"]
+    },
+    {
+      "id": "GOAI-LESSON-7",
+      "title": "Surrogate orfano UTF-16 — non applicato qui (string passthrough), ma le emoji nei bundle restano intere per design",
+      "implementation_files": ["locales/*.json"]
+    }
+  ],
+  "controls_detail": [
+    {
+      "id": "GDPR-12",
+      "control_type": "transparency",
+      "mapping": "L'art. 12 GDPR impone trasparenza nelle comunicazioni col data subject (utente). Mother-language è uno dei requisiti chiave per consenso valido informato. Il brick risolve auto la lingua dell'utente da Telegram language_code + persiste preferenza esplicita (/lingua).",
+      "implementation_files": ["helpers/detect-locale.ts", "helpers/persist-user-locale.ts"]
+    },
+    {
+      "id": "WCAG-3.1.1",
+      "control_type": "accessibility",
+      "mapping": "WCAG 2.1 SC 3.1.1 'Language of Page' richiede che il linguaggio default sia esplicitamente dichiarato e ne consenta la traduzione automatica. Il brick mantiene `resolved_locale` in `tWithMeta()` per audit e logging.",
+      "implementation_files": ["helpers/t.ts"]
+    },
+    {
+      "id": "OWASP-A03",
+      "control_type": "injection_prevention",
+      "mapping": "I bundle contengono HTML inline pre-trusted (tag <b>, <i>, <code>, <a>). Le vars interpolate {{var}} NON vengono auto-escapate dal brick — il consumer deve passare vars già escapate via brick `telegram-push-soft.escapeHtml()` quando arrivano da fonti user-supplied (nome utente, testo libero).",
+      "implementation_files": ["helpers/t.ts", "README.md"]
+    },
+    {
+      "id": "OWASP-A04",
+      "control_type": "secure_design",
+      "mapping": "Chiave mancante non lancia eccezione: log warn strutturato + return key. Bot resta vivo, utente riceve la chiave raw (degradazione visibile ma controllata).",
+      "implementation_files": ["helpers/t.ts", "helpers/load-locale-bundle.ts"]
+    },
+    {
+      "id": "OWASP-A09",
+      "control_type": "observability",
+      "mapping": "console.warn strutturato su missing_key + locale + fallback_used. Permette di rilevare bundle incompleti in produzione senza affidarsi a unit test.",
+      "implementation_files": ["helpers/t.ts", "helpers/format-currency.ts", "helpers/format-date.ts"]
+    }
+  ],
+  "anti_patterns_explicitly_avoided": [
+    {
+      "donor_alt": "GOMAPLAB/supabase/functions/_shared/messages.ts",
+      "anti_pattern": "if (lang === 'it') return 'Ciao'; else if (lang === 'en') return 'Hi'; else throw new Error('lang non supportata')",
+      "why_bad": "Throw su locale non riconosciuto fa morire la edge fn. Lock-in stretto al codice (no JSON bundle = no Matteo Web autonomo).",
+      "replacement": "JSON bundle + fallback chain + log warn"
+    },
+    {
+      "donor_alt": "goyouravatar/supabase/functions/_shared/i18n.ts (variante semplificata)",
+      "anti_pattern": "Hardcoded `it` everywhere, no language_code detect",
+      "why_bad": "Utenti EN/ES/PT ricevono UI italiana — viola WCAG 3.1.1 + esperienza degradata.",
+      "replacement": "detectLocale(user_override, update.from.language_code) → Locale"
+    }
+  ],
+  "test_evidence_required": [
+    "t(registry, 'it', 'common.yes') → 'Sì'",
+    "t(registry, 'en', 'common.yes') → 'Yes'",
+    "t(registry, 'pt', 'common.yes') → 'Sim'",
+    "t(registry, 'ja', 'common.yes') → fallback EN 'Yes' (locale non supportata)",
+    "t(registry, 'it', 'inesistente.key') → 'inesistente.key' + console.warn",
+    "t(registry, 'it', 'command.start', {name: 'Mario'}) → '<b>👋 Ciao Mario!</b>'",
+    "tWithMeta(registry, 'pt', 'tech.error_branch', {branch: 'X', detail: 'Y'}) → fallback_used:false",
+    "tWithMeta(registry, 'ja', 'common.yes') → fallback_used:true, resolved_locale:'en'",
+    "detectLocale(null, 'it-IT') → 'it'",
+    "detectLocale('pt', 'en-US') → 'pt' (user_override autoritativo)",
+    "detectLocale('xx', 'en-US') → 'en' (override invalido, fallback Telegram code)",
+    "tPlural(1, {one: '1 contatto', other: '{{count}} contatti'}) → '1 contatto'",
+    "tPlural(5, {one: '1 contatto', other: '{{count}} contatti'}) → '5 contatti'",
+    "formatCurrency(1234.5, {currency: 'EUR', locale: 'it'}) → '1.234,50 €'",
+    "formatCurrency(1234.5, {currency: 'XXX', locale: 'it'}) → fallback '1234.50 XXX'",
+    "formatDate(new Date('2026-05-23'), {style: 'medium', locale: 'it'}) → '23 mag 2026'",
+    "validateLocaleInput('PT') → {ok:true, locale:'pt'}",
+    "validateLocaleInput('klingon') → {ok:false, error:'unsupported_locale'}",
+    "createRegistry({it: {custom_key: 'Custom'}}) → builtin + custom_key disponibile"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "brick_name": "telegram-bot-snapshot-test",
+  "category": "G-Ops",
+  "version": "0.1.0",
+  "le_go_principles": ["regression-safety", "observability", "rollback-readiness"],
+  "compliance": {
+    "gdpr": ["art.5-minimization"],
+    "owasp": ["A05-security-misconfiguration"]
+  },
+  "depends_on": ["telegram-push-soft", "telegram-webhook-secret-verify"],
+  "tenant_scoped": false,
+  "purpose": "Cattura snapshot HTTP response webhook bot Telegram pre/post refactor. Diff zero = safe merge Fase 6.",
+  "limitations_v0_1": [
+    "snapshot solo response HTTP, non outbound sendMessage reali",
+    "fixture senza PII reale (chat_id Giuseppe pubblico interno OK)"
+  ]
+}

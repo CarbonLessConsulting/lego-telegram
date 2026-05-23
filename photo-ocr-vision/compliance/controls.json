@@ -1,0 +1,158 @@
+{
+  "brick_name": "telegram-photo-ocr-vision",
+  "version": "0.1.0",
+  "category": "E-Media",
+  "le_go_principles": ["data-minimization", "cost-transparency", "soft-no-throw"],
+  "compliance": {
+    "gdpr": ["art.5-minimization", "art.32-security", "art.30-records"],
+    "ai_act": ["art.10-data-quality", "art.13-transparency"]
+  },
+  "depends_on": ["telegram-push-soft"],
+  "tenant_scoped": false,
+  "controls": [
+    {
+      "id": "GDPR-5.1.c",
+      "framework": "GDPR Reg. UE 2016/679",
+      "article": "Art. 5 §1 lett. c — Minimizzazione dei dati",
+      "control_type": "data_minimization",
+      "mapping": "Image raw NON persistita. Testo OCR NON loggato in audit (solo char count). Solo metriche tecniche in audit log: template usato, file_size_kb, cost_usd, token usage. Il consumer del brick (es. CRM, ERP officina) decide se persistere il testo estratto con base giuridica adeguata (contratto / consenso).",
+      "implementation_files": ["index.ts", "helpers/persist-audit.ts"]
+    },
+    {
+      "id": "GDPR-32.1.b",
+      "framework": "GDPR Reg. UE 2016/679",
+      "article": "Art. 32 §1 lett. b — Capacita' di assicurare disponibilita' e resilienza",
+      "control_type": "resilience",
+      "mapping": "Retry su transient Anthropic (429, 5xx). Soft no-throw end-to-end. File size guard (default 20MB) per prevenire abuse + OOM. Pre-flight check MIME su document download (no scarico file non processabili).",
+      "implementation_files": ["helpers/ocr-claude-vision.ts", "helpers/download-document.ts"]
+    },
+    {
+      "id": "GDPR-30.1",
+      "framework": "GDPR Reg. UE 2016/679",
+      "article": "Art. 30 §1 — Registri delle attivita' di trattamento",
+      "control_type": "record_keeping",
+      "mapping": "Audit callback consente al consumer di registrare ogni OCR (timestamp, template, dimensione, costo, token, durata) senza esporre contenuto. Compliance-ready per registro art. 30.",
+      "implementation_files": ["helpers/persist-audit.ts"]
+    },
+    {
+      "id": "AI-ACT-13",
+      "framework": "AI Act UE 2024/1689",
+      "article": "Art. 13 — Trasparenza verso gli utenti dei sistemi AI",
+      "control_type": "transparency",
+      "mapping": "Modello Claude esposto in result + audit. Il consumer puo' comunicare all'utente quale AI processa il file. Costo esposto in USD per trasparenza economica + chargeback.",
+      "implementation_files": ["index.ts", "helpers/ocr-claude-vision.ts"]
+    },
+    {
+      "id": "AI-ACT-10",
+      "framework": "AI Act UE 2024/1689",
+      "article": "Art. 10 — Qualita' dei dati di training/input",
+      "control_type": "input_quality",
+      "mapping": "Best resolution photo selezionata da Telegram array (pickBestPhotoSize) per max OCR accuracy. Pre-flight MIME check filtra file non supportati. Template strutturati hanno JSON schema esplicito per validation downstream.",
+      "implementation_files": ["helpers/download-photo.ts", "helpers/download-document.ts", "prompts/"]
+    },
+    {
+      "id": "LE-GO-PRINCIPLE-7",
+      "framework": "le-GO SECURITY_PILLAR",
+      "article": "Principio 7 — Soft helper no-throw",
+      "control_type": "integrity",
+      "mapping": "captureOcr + tutti gli helper MAI throw. Ritornano risultato strutturato { ok, reason, detail }. Edge fn chiamante non muore mai a meta' pipeline.",
+      "implementation_files": ["index.ts", "helpers/*.ts"]
+    },
+    {
+      "id": "LE-GO-COST-TRANSPARENCY",
+      "framework": "le-GO Principles",
+      "article": "Cost transparency by design",
+      "control_type": "economic_transparency",
+      "mapping": "Costo USD calcolato da token reali (input/output da response.usage). Pricing ufficiale Anthropic Claude 3.5 Sonnet ($3/$15 per 1M tok). Esposto in result + audit.",
+      "implementation_files": ["helpers/ocr-claude-vision.ts"]
+    },
+    {
+      "id": "GOAI-LESSON-11",
+      "framework": "GOAi lezioni critiche (~/.claude/CLAUDE.md)",
+      "article": "Lezione #11 — Image base64 per PDF/HTML su Deno (>50KB)",
+      "control_type": "performance",
+      "mapping": "encodeBase64Chunked() usa chunk 8192 byte (override fino a 32768) per evitare stack overflow su immagini grosse. NO btoa(String.fromCharCode(...bytes)) su buffer intero — pattern donor GMR _shared/telegram.ts.",
+      "implementation_files": ["helpers/encode-base64-chunked.ts"],
+      "incident_reference": "PDF garanzia Decar 19/05/2026 (CSP) e generale OOM su PDF rendering pre-fix"
+    },
+    {
+      "id": "GOAI-LESSON-14",
+      "framework": "GOAi lezioni critiche (~/.claude/CLAUDE.md)",
+      "article": "Lezione #14 — Helper sendMessage Telegram MAI throw",
+      "control_type": "design_pattern",
+      "mapping": "Stesso pattern applicato a downloadPhoto, downloadDocument, ocrClaudeVision, ocrWithTemplate, persistAudit. Soft fail su qualsiasi errore.",
+      "implementation_files": ["helpers/*.ts"]
+    }
+  ],
+  "anti_patterns_explicitly_avoided": [
+    {
+      "donor": "generic deno legacy",
+      "anti_pattern": "btoa(String.fromCharCode(...bytes)) su buffer > 50KB",
+      "why_bad": "V8 spread operator argument limit → stack overflow su immagini grosse. Lezione globale #11.",
+      "replacement": "encodeBase64Chunked() con chunk 8192-32768 byte"
+    },
+    {
+      "donor": "GOMAPLAB legacy",
+      "anti_pattern": "throw new Error su Claude API 4xx/5xx",
+      "why_bad": "Edge fn chiamante muore a meta'. Stato DB inconsistente.",
+      "replacement": "Ritorno soft { ok: false, reason, detail }"
+    },
+    {
+      "donor": "generic",
+      "anti_pattern": "Persistere image raw su Storage per debugging",
+      "why_bad": "GDPR art. 5 minimization. Se la foto contiene PII (documento identita') la base giuridica e' del consumer, non del brick.",
+      "replacement": "Image dimenticata post-OCR. Solo metriche tecniche in audit."
+    },
+    {
+      "donor": "generic",
+      "anti_pattern": "Loggare il testo estratto nell'audit",
+      "why_bad": "Il testo OCR puo' contenere PII gravi (codice fiscale, dati documento). Audit ha base giuridica diversa dal consumer.",
+      "replacement": "Solo char count nell'audit (extracted_chars)."
+    },
+    {
+      "donor": "gosolution/ocr-libretto",
+      "anti_pattern": "image_base64 passato attraverso parametri URL/body senza size check",
+      "why_bad": "Possibile DoS se utente carica file enormi. Anthropic ha limiti hard (20MB).",
+      "replacement": "maxFileKb default 20480 (20MB) + pre-flight check"
+    }
+  ],
+  "test_evidence_required": [
+    "Test unit: captureOcr con botToken vuoto → { ok: false, reason: 'invalid_config' }",
+    "Test unit: captureOcr con file 25MB → { ok: false, reason: 'file_too_large' }",
+    "Test unit: encodeBase64Chunked(bytes 100KB) === btoa-equivalent corretto",
+    "Test unit: pickBestPhotoSize([thumb, small, medium, large]) ritorna 'large'",
+    "Test unit: isSupportedDocumentMime('application/pdf') === true",
+    "Test unit: isSupportedDocumentMime('application/zip') === false",
+    "Test mock: Claude 429 x2 → 1 retry, poi { ok: false, reason: 'ocr_failed' }",
+    "Test mock: Claude risponde markdown ```json {...} ``` → structured parsato correttamente",
+    "Test mock: Claude risponde testo non-JSON con template strutturato → parseFailed: true, extracted_text presente",
+    "Test unit: computeClaudeVisionCostUsd(1100, 200) calcola $0.0033 + $0.003 = $0.0063",
+    "Test compliance: audit entry NON contiene extracted_text (solo extracted_chars)",
+    "Test integration: captureOcr({kind:'document', document: pdfDoc}) → media_type 'application/pdf' verso Anthropic (source.type 'document')"
+  ],
+  "pricing_reference": {
+    "model": "claude-sonnet-4-5 (Claude 3.5 Sonnet)",
+    "price_usd_input_per_mtok": 3.0,
+    "price_usd_output_per_mtok": 15.0,
+    "image_tokens_approx": 1100,
+    "source": "https://www.anthropic.com/pricing",
+    "verified_at": "2026-05-23",
+    "note": "Token immagine reali ritornati da usage.input_tokens nell'API response, usati per cost calc esatto"
+  },
+  "donor_files": {
+    "primary": "/Users/mba/Sviluppo/erp/gomyreference/supabase/functions/goref-capture-photo/index.ts",
+    "primary_helpers": [
+      "/Users/mba/Sviluppo/erp/gomyreference/supabase/functions/_shared/claude-vision.ts",
+      "/Users/mba/Sviluppo/erp/gomyreference/supabase/functions/_shared/telegram.ts",
+      "/Users/mba/Sviluppo/erp/gomyreference/supabase/functions/_shared/usage-meter.ts"
+    ],
+    "secondary": [
+      "/Users/mba/Sviluppo/erp/gosolution/supabase/functions/ocr-documento-identita/index.ts",
+      "/Users/mba/Sviluppo/erp/gosolution/supabase/functions/ocr-libretto/index.ts",
+      "/Users/mba/Sviluppo/erp/gosolution/supabase/functions/ocr-contachilometri/index.ts",
+      "/Users/mba/Sviluppo/erp/gosolution/supabase/functions/ocr-obd/index.ts",
+      "/Users/mba/Sviluppo/erp/gosolution/supabase/functions/ocr-analizzatore-gas/index.ts",
+      "/Users/mba/Sviluppo/erp/gosolution/supabase/functions/_shared/ai-failover.ts"
+    ]
+  }
+}

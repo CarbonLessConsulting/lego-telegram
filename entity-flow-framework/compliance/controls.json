@@ -1,0 +1,55 @@
+{
+  "brick_name": "telegram-entity-flow-framework",
+  "version": "0.1.0",
+  "category": "I-Domain",
+  "le_go_principles": [
+    "declarative-over-imperative",
+    "tenant-scoped",
+    "soft-helper-no-throw"
+  ],
+  "compliance": {
+    "gdpr": [
+      "art.5.1.c.minimization",
+      "art.5.1.b.purpose_limitation",
+      "art.32.1.b.confidentiality_integrity"
+    ],
+    "owasp": [
+      "A03.injection.input_validation",
+      "A04.insecure_design.tenant_scoping"
+    ]
+  },
+  "depends_on": [
+    "telegram-state-machine-capture",
+    "rls-multitenant"
+  ],
+  "depends_on_optional": [
+    "audit-log-immutable",
+    "sofia-prompt-injection-guard",
+    "telegram-crm-prefetch-lookup"
+  ],
+  "tenant_scoped": true,
+  "consumers_typical": [
+    "telegram-webhook (orchestra wizard cliente/veicolo/preventivo/intervento)",
+    "sofia-dispatcher (può triggerare un flow run come tool call)"
+  ],
+  "security_baseline": {
+    "auth_2fa_no_magiclink": "N/A",
+    "rls_4_policy": "migration template include 4 policy + unique index su (tenant+chat+entity status=running)",
+    "audit_log_immutable": "raccomandato per ogni step transition + commit",
+    "encryption_at_rest": "ereditato",
+    "rate_limit": "TTL 30min default per flow run",
+    "prompt_injection_guard": "raccomandato wrapping input PRIMA di validateStepInput"
+  },
+  "tested": false,
+  "extracted_from": [
+    "gosolution/supabase/functions/gomec-telegram-webhook/entities/_shared.ts (FieldSpec + nextMissingField + applyCorrection)",
+    "gosolution/supabase/functions/gomec-telegram-webhook/entities/cliente.ts (1014 LOC wizard donor)",
+    "gosolution/supabase/functions/gomec-telegram-webhook/entities/veicolo.ts",
+    "gosolution/supabase/functions/gomec-telegram-webhook/entities/preventivo.ts",
+    "gosolution/supabase/functions/gomec-telegram-webhook/entities/{tagliando,intervento,fap,magazzino,crm}.ts",
+    "gosolution/supabase/functions/gomec-telegram-webhook/_session.ts (TTL pattern)"
+  ],
+  "extracted_at": "2026-05-23",
+  "obligatorio_per_ogni_prodotto_le_GO": false,
+  "note": "Framework declarativo multi-step per entity. NON sostituisce telegram-state-machine-capture (gestisce draft singolo): è un orchestratore di sequenze multi-step su entity diverse, complementare al state machine."
+}

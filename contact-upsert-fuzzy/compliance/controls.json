@@ -1,0 +1,44 @@
+{
+  "brick": "telegram-contact-upsert-fuzzy",
+  "version": "0.1.0",
+  "category": "C-Data",
+  "compliance_controls": [
+    "GDPR.art.5.1.c.data_minimization",
+    "GDPR.art.5.1.d.data_accuracy",
+    "GDPR.art.32.1.b.confidentiality_integrity",
+    "GDPR.art.32.1.d.regular_testing",
+    "le-GO.principio.1.rls_4_policy",
+    "le-GO.principio.7.soft_helper_no_throw"
+  ],
+  "security_baseline": {
+    "auth_2fa_no_magiclink": "N/A (brick C-Data, autenticazione fuori scope)",
+    "rls_4_policy": "migration template include 4 policy granulari tenant_id + owner_user_id",
+    "audit_log_immutable": "consumer DEVE chiamare brick audit-log-immutable per inserted/updated (suggerito in INTEGRATION)",
+    "encryption_at_rest": "ereditato da Supabase",
+    "rate_limit": "OpenAI embeddings retry 3x backoff; pgvector index HNSW efficiente",
+    "prompt_injection_guard": "extract-contact prompt usa triple-quote delimitation minima; raccomandato wrapping con brick prompt-injection-guard"
+  },
+  "depends_on": [
+    "audit-log-immutable",
+    "rls-multitenant"
+  ],
+  "depends_on_optional": [
+    "telegram-photo-ocr-vision",
+    "telegram-voice-capture-whisper",
+    "sofia-prompt-injection-guard"
+  ],
+  "consumers_typical": [
+    "telegram-webhook (capture foto biglietto / vocale / vCard)",
+    "PWA companion (form manuale)",
+    "API integrazioni esterne (HubSpot, Calendar sync, ecc.)"
+  ],
+  "tested": false,
+  "extracted_from": [
+    "gomyreference (_shared/contact-upsert.ts 462 LOC + contact-match.ts + embedding.ts)",
+    "gomyreference (migration goref_find_contact_by_embedding_admin)",
+    "gomyreference (migration goref_find_similar_by_name + pg_trgm)"
+  ],
+  "extracted_at": "2026-05-23",
+  "obligatorio_per_ogni_prodotto_le_GO": false,
+  "note": "Brick C-Data drop-in per prodotti che gestiscono contatti relazionali. Embedding OpenAI text-embedding-3-small 1536d. Threshold runtime configurabili. Mai throw, ritorna UpsertResult con action='noop'+error in caso di soft fail."
+}
