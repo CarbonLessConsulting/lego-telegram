@@ -7,9 +7,9 @@ import type {
   TelegramBrandLoader,
   TelegramBrandLoadResult,
   TelegramBrandResolved,
-} from '../types';
-import { TELEGRAM_NEUTRAL_BRAND } from '../types';
-import { getCachedBrand, setCachedBrand } from './lazy-cache';
+} from "../types.ts";
+import { TELEGRAM_NEUTRAL_BRAND } from "../types.ts";
+import { getCachedBrand, setCachedBrand } from "./lazy-cache.ts";
 
 /**
  * Merge canonical: campi `incoming` non-null sovrascrivono `base`,

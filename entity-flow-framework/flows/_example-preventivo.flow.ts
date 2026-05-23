@@ -3,7 +3,7 @@
 //
 // Esempio con branch step: scegli "rapido" (3 campi) vs "completo" (8 campi).
 
-import type { EntityFlowDefinition } from '../types';
+import type { EntityFlowDefinition } from "../types.ts";
 
 export const examplePreventivoFlow: EntityFlowDefinition = {
   id: 'example_preventivo_create',

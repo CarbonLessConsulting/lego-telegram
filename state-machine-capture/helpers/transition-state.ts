@@ -3,7 +3,7 @@
 //
 // Transizione di stato del draft: capture -> review (pending) -> save -> done.
 
-import type { DraftState } from '../types';
+import type { DraftState } from "../types.ts";
 
 interface SupabaseLike {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

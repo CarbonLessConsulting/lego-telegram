@@ -9,43 +9,43 @@ export {
   type PrefetchConfig,
   type PrefetchHints,
   type SupabaseLike,
-} from './types';
+} from "./types.ts";
 
 export {
   extractCandidates,
   filterUsefulTokens,
-} from './helpers/extract-candidates';
+} from "./helpers/extract-candidates.ts";
 
 export {
   fuzzySearchCrm,
-} from './helpers/fuzzy-search-crm';
+} from "./helpers/fuzzy-search-crm.ts";
 
 export {
   rankCandidates,
   scoreCandidate,
   topK,
-} from './helpers/rank-candidates';
+} from "./helpers/rank-candidates.ts";
 
 export {
   renderHintsForSystemPrompt,
   buildEmptyHints,
-} from './helpers/render-hints-system-prompt';
+} from "./helpers/render-hints-system-prompt.ts";
 
 export {
   persistPrefetchAudit,
   type LogAuditFn,
-} from './helpers/persist-audit';
+} from "./helpers/persist-audit.ts";
 
 // ---------------------------------------------------------------------------
 // Convenience orchestrator
 // ---------------------------------------------------------------------------
 
-import { extractCandidates, filterUsefulTokens } from './helpers/extract-candidates';
-import { fuzzySearchCrm } from './helpers/fuzzy-search-crm';
-import { rankCandidates, topK } from './helpers/rank-candidates';
-import { buildEmptyHints } from './helpers/render-hints-system-prompt';
-import { persistPrefetchAudit, type LogAuditFn } from './helpers/persist-audit';
-import type { PrefetchConfig, PrefetchHints, SupabaseLike } from './types';
+import { extractCandidates, filterUsefulTokens } from "./helpers/extract-candidates.ts";
+import { fuzzySearchCrm } from "./helpers/fuzzy-search-crm.ts";
+import { rankCandidates, topK } from "./helpers/rank-candidates.ts";
+import { buildEmptyHints } from "./helpers/render-hints-system-prompt.ts";
+import { persistPrefetchAudit, type LogAuditFn } from "./helpers/persist-audit.ts";
+import type { PrefetchConfig, PrefetchHints, SupabaseLike } from "./types.ts";
 
 /**
  * Orchestrator end-to-end: estrai token → fuzzy search → rank → topK → audit.

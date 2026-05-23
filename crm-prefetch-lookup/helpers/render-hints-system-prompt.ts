@@ -1,6 +1,6 @@
 // Brick: telegram-crm-prefetch-lookup v0.1.0 (le-GO I-Domain)
 
-import type { PrefetchHints } from '../types';
+import type { PrefetchHints } from "../types.ts";
 
 /**
  * Render hints come blocco JSON da iniettare nel system prompt Sofia.

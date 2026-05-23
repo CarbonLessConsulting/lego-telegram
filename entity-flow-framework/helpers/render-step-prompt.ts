@@ -1,7 +1,7 @@
 // Donor: ~/Sviluppo/erp/gomyreference/supabase/functions/_shared/i18n.ts (interpolate pattern)
 // Brick: telegram-entity-flow-framework v0.1.0 (le-GO I-Domain)
 
-import type { FlowStep } from '../types';
+import type { FlowStep } from "../types.ts";
 
 /**
  * Interpolazione canonical `{{var}}` allineata al pattern le-GO

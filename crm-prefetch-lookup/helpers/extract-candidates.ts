@@ -2,7 +2,7 @@
 //   (token extraction pattern dal Sofia turn input)
 // Brick: telegram-crm-prefetch-lookup v0.1.0 (le-GO I-Domain)
 
-import type { CandidateToken } from '../types';
+import type { CandidateToken } from "../types.ts";
 
 /**
  * Estrae token candidati da testo libero utente.

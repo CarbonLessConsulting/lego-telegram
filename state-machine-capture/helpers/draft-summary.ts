@@ -4,7 +4,7 @@
 // Riassunto draft pre-review: sintesi delle source che hanno contribuito
 // + key fields del payload per UX preview Telegram.
 
-import type { DraftRow } from '../types';
+import type { DraftRow } from "../types.ts";
 
 export interface DraftSummary {
   /** Numero di source che hanno contribuito al draft. */

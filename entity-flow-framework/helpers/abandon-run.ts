@@ -1,7 +1,7 @@
 // Brick: telegram-entity-flow-framework v0.1.0 (le-GO I-Domain)
 
-import type { FlowEngineConfig, SupabaseLike } from '../types';
-import { DEFAULT_ENGINE_CONFIG } from '../types';
+import type { FlowEngineConfig, SupabaseLike } from "../types.ts";
+import { DEFAULT_ENGINE_CONFIG } from "../types.ts";
 
 /**
  * Marca un singolo run come `abandoned` (user cancel o admin manual).

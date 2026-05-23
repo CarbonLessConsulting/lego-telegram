@@ -1,7 +1,7 @@
 // Brick: telegram-crm-prefetch-lookup v0.1.0 (le-GO I-Domain)
 // Dep: audit-log-immutable (brick le-GO esistente)
 
-import type { PrefetchAuditPayload, PrefetchHints } from '../types';
+import type { PrefetchAuditPayload, PrefetchHints } from "../types.ts";
 
 /**
  * Logga audit privacy-safe del prefetch.

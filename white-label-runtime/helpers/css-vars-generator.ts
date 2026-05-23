@@ -2,7 +2,7 @@
 // Donor: ~/Sviluppo/erp/gocotech-website/src/le-go/brand-white-label/lib/brand-config.ts
 // Brick: telegram-white-label-runtime v0.1.0 (le-GO C-UI)
 
-import type { TelegramBrandConfig } from '../types';
+import type { TelegramBrandConfig } from "../types.ts";
 
 /**
  * Converte hex (#1A4D5C) o HSL string ("192 71% 21%") in formato CSS var

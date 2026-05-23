@@ -5,11 +5,11 @@ import type {
   FlowEngineConfig,
   FlowRunRow,
   SupabaseLike,
-} from '../types';
-import { DEFAULT_ENGINE_CONFIG } from '../types';
-import { getFlow, getNextStep } from './define-flow';
-import { renderStepPrompt } from './render-step-prompt';
-import { validateStepInput } from './validate-step-input';
+} from "../types.ts";
+import { DEFAULT_ENGINE_CONFIG } from "../types.ts";
+import { getFlow, getNextStep } from "./define-flow.ts";
+import { renderStepPrompt } from "./render-step-prompt.ts";
+import { validateStepInput } from "./validate-step-input.ts";
 
 /**
  * Avanza il flow run dato l'input utente.

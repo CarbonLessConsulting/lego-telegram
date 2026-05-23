@@ -40,7 +40,7 @@ export async function sendDocument(
     document,
     ...(opts.caption && { caption: opts.caption }),
     ...(opts.parse_mode && { parse_mode: opts.parse_mode }),
-    ...(opts.reply_markup && { reply_markup: opts.reply_markup }),
+    ...(opts.reply_markup ? { reply_markup: opts.reply_markup as Record<string, unknown> } : {}),
     ...(opts.reply_to_message_id && { reply_to_message_id: opts.reply_to_message_id }),
     ...(opts.disable_notification && { disable_notification: opts.disable_notification }),
     ...(opts.thumbnail && { thumbnail: opts.thumbnail }),

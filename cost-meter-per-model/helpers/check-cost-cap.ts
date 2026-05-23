@@ -3,9 +3,9 @@
 // Verifica se l'utente / tenant ha superato il cap configurato.
 // Ritorna {allowed, current, cap}. Mai-throw.
 
-import { computeDailyCost } from './compute-daily-cost';
-import { computeMonthlyCost } from './compute-monthly-cost';
-import type { CostCapResult } from '../types';
+import { computeDailyCost } from "./compute-daily-cost.ts";
+import { computeMonthlyCost } from "./compute-monthly-cost.ts";
+import type { CostCapResult } from "../types.ts";
 
 interface SupabaseLike {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

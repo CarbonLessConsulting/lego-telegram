@@ -3,7 +3,7 @@
 //
 // Carica il draft attivo per (chat_id) — uno solo grazie al UNIQUE INDEX parziale.
 
-import { ACTIVE_STATES, type DraftRow } from '../types';
+import { ACTIVE_STATES, type DraftRow } from "../types.ts";
 
 interface SupabaseLike {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

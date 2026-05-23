@@ -1,9 +1,9 @@
 // Donor: ~/Sviluppo/erp/gosolution/.../gomec-telegram-webhook/_session.ts (TTL pattern)
 // Brick: telegram-entity-flow-framework v0.1.0 (le-GO I-Domain)
 
-import type { FlowEngineConfig, FlowRunRow, SupabaseLike } from '../types';
-import { DEFAULT_ENGINE_CONFIG } from '../types';
-import { getFlow } from './define-flow';
+import type { FlowEngineConfig, FlowRunRow, SupabaseLike } from "../types.ts";
+import { DEFAULT_ENGINE_CONFIG } from "../types.ts";
+import { getFlow } from "./define-flow.ts";
 
 /**
  * Avvia un nuovo flow run per un (tenant, owner, chat).

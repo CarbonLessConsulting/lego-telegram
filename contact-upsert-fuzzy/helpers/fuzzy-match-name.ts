@@ -3,7 +3,7 @@
 // Donor: ~/Sviluppo/erp/gomyreference/supabase/functions/_shared/contact-upsert.ts (fuzzy name fallback)
 // Brick: telegram-contact-upsert-fuzzy v0.1.0 (le-GO C-Data)
 
-import type { MatchCandidate, SupabaseLike } from '../types';
+import type { MatchCandidate, SupabaseLike } from "../types.ts";
 
 /**
  * Fuzzy name match via pg_trgm `similarity()`.

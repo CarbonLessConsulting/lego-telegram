@@ -9,11 +9,11 @@ import type {
   MatchThresholds,
   SupabaseLike,
   UpsertResult,
-} from '../types';
-import { DEFAULT_THRESHOLDS } from '../types';
-import { searchSimilarByEmbedding } from './search-similar';
-import { fuzzyMatchByName } from './fuzzy-match-name';
-import { mergeContactFields } from './merge-contact-fields';
+} from "../types.ts";
+import { DEFAULT_THRESHOLDS } from "../types.ts";
+import { searchSimilarByEmbedding } from "./search-similar.ts";
+import { fuzzyMatchByName } from "./fuzzy-match-name.ts";
+import { mergeContactFields } from "./merge-contact-fields.ts";
 
 interface UpsertContactOpts {
   /** Adapter Supabase (edge fn service_role o Node service_role). */
@@ -174,7 +174,7 @@ async function findByOverlap(
     // Costruisce manualmente la query via .from(...).select(...).eq(...).overlaps(...)
     // Il tipo SupabaseLike è loose; usiamo cast minimo per accedere alla chain reale.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const chain: any = sb.from(table).select('id, full_name')
+    const chain: any = (sb.from as (t: string) => any)(table).select('id, full_name')
       .eq('tenant_id', params.tenant_id)
       .eq('owner_user_id', params.owner_user_id);
     const { data, error } = await chain
@@ -198,7 +198,7 @@ async function updateMerge(
   try {
     // Read existing per merge
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const chain: any = sb.from(table).select('*').eq('id', id);
+    const chain: any = (sb.from as (t: string) => any)(table).select('*').eq('id', id);
     const { data: existing, error: rErr } = await chain.maybeSingle();
     if (rErr || !existing) {
       return { action: 'noop', id: null, error: 'existing_row_lookup_failed' };

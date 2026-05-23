@@ -1,6 +1,6 @@
 // Brick: telegram-crm-prefetch-lookup v0.1.0 (le-GO I-Domain)
 
-import type { CandidateTokenKind, CrmCandidate } from '../types';
+import type { CandidateTokenKind, CrmCandidate } from "../types.ts";
 
 /**
  * Score base per kind di token matchato. Più "preciso" = score più alto.

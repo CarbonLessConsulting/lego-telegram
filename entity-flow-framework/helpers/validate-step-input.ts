@@ -1,7 +1,7 @@
 // Donor: ~/Sviluppo/erp/gosolution/.../entities/_shared.ts (applyCorrection, FieldSpec validation pattern)
 // Brick: telegram-entity-flow-framework v0.1.0 (le-GO I-Domain)
 
-import type { FlowFieldSpec, FlowStep } from '../types';
+import type { FlowFieldSpec, FlowStep } from "../types.ts";
 
 export interface ValidationResult {
   ok: boolean;

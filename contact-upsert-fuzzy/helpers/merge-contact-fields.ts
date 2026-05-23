@@ -2,7 +2,7 @@
 //   (setUnion + pickNonNull + merge logic righe ~324-389)
 // Brick: telegram-contact-upsert-fuzzy v0.1.0 (le-GO C-Data)
 
-import type { ContactCanonical } from '../types';
+import type { ContactCanonical } from "../types.ts";
 
 /**
  * Unione di array senza duplicati, lato JS (non DB).

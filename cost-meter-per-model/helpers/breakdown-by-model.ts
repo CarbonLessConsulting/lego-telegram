@@ -2,7 +2,7 @@
 //
 // Group by model + sum cost (per dashboard analytics).
 
-import type { BreakdownRow } from '../types';
+import type { BreakdownRow } from "../types.ts";
 
 interface SupabaseLike {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

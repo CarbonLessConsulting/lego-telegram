@@ -4,7 +4,7 @@
 // Helper: marca come 'abandoned' o cancella drafts con expires_at scaduto.
 // Idempotente. Chiamabile da cron / scheduled fn.
 
-import type { AbandonResult } from '../types';
+import type { AbandonResult } from "../types.ts";
 
 interface SupabaseLike {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -8,35 +8,35 @@ export {
   type TelegramBrandLoader,
   type TelegramBrandLoadResult,
   type TelegramBrandResolved,
-} from './types';
+} from "./types.ts";
 
 export {
   loadBrandConfig,
   mergeBrand,
-} from './helpers/load-brand-config';
+} from "./helpers/load-brand-config.ts";
 
 export {
   applyBrandTemplate,
   buildBrandVars,
-} from './helpers/apply-brand-template';
+} from "./helpers/apply-brand-template.ts";
 
 export {
   renderWelcomeMessage,
-} from './helpers/render-welcome-message';
+} from "./helpers/render-welcome-message.ts";
 
 export {
   renderSignature,
   appendSignature,
-} from './helpers/render-signature';
+} from "./helpers/render-signature.ts";
 
 export {
   generateCssVars,
   toHslVar,
-} from './helpers/css-vars-generator';
+} from "./helpers/css-vars-generator.ts";
 
 export {
   getCachedBrand,
   setCachedBrand,
   invalidateBrandCache,
   brandCacheStats,
-} from './helpers/lazy-cache';
+} from "./helpers/lazy-cache.ts";

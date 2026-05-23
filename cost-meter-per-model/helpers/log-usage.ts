@@ -3,8 +3,8 @@
 //
 // Helper canonical: insert ai_usage_logs (soft, no-throw). Fire-and-forget.
 
-import { getPricing, WHISPER_USD_PER_AUDIO_SECOND } from '../pricing/model-prices';
-import type { AiUsageEntry, CostComputation } from '../types';
+import { getPricing, WHISPER_USD_PER_AUDIO_SECOND } from "../pricing/model-prices.ts";
+import type { AiUsageEntry, CostComputation } from "../types.ts";
 
 interface SupabaseLike {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

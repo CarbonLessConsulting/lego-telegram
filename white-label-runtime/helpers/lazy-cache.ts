@@ -2,7 +2,7 @@
 //   e dalla cache TTL di `_shared/i18n.ts` (gomyreference) implicita.
 // Brick: telegram-white-label-runtime v0.1.0 (le-GO C-UI)
 
-import type { TelegramBrandResolved } from '../types';
+import type { TelegramBrandResolved } from "../types.ts";
 
 interface CacheEntry {
   value: TelegramBrandResolved;

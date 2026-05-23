@@ -4,9 +4,9 @@
 // NON applicare automaticamente in produzione senza review umana — il merge
 // distruttivo non è reversibile.
 
-import type { ContactCanonical, MatchCandidate, SupabaseLike } from '../types';
-import { searchSimilarByEmbedding } from './search-similar';
-import { mergeContactFields } from './merge-contact-fields';
+import type { ContactCanonical, MatchCandidate, SupabaseLike } from "../types.ts";
+import { searchSimilarByEmbedding } from "./search-similar.ts";
+import { mergeContactFields } from "./merge-contact-fields.ts";
 
 export interface DedupPlan {
   /** Coppie (keep_id, drop_id, similarity). */
@@ -45,7 +45,7 @@ export async function buildDedupPlan(
   const sampleSize = params.sample_size ?? 200;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const chain: any = sb.from(params.table).select('id, full_name, embedding')
+  const chain: any = (sb.from as (t: string) => any)(params.table).select('id, full_name, embedding')
     .eq('tenant_id', params.tenant_id)
     .eq('owner_user_id', params.owner_user_id);
   const { data, error } = await chain.limit?.(sampleSize)?.maybeSingle?.() ?? { data: null, error: null };

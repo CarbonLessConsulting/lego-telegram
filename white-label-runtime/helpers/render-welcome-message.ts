@@ -2,8 +2,8 @@
 //   (chiavi `bot.onboarding.greeting_named` + `greeting_anon`)
 // Brick: telegram-white-label-runtime v0.1.0 (le-GO C-UI)
 
-import type { BotLang, TelegramBrandConfig } from '../types';
-import { applyBrandTemplate, buildBrandVars } from './apply-brand-template';
+import type { BotLang, TelegramBrandConfig } from "../types.ts";
+import { applyBrandTemplate, buildBrandVars } from "./apply-brand-template.ts";
 
 /**
  * Default welcome message multi-lingua (HTML-safe per Telegram `parse_mode='HTML'`).

@@ -1,7 +1,7 @@
 // Donor: ~/Sviluppo/erp/gomyreference/supabase/functions/_shared/embedding.ts
 // Brick: telegram-contact-upsert-fuzzy v0.1.0 (le-GO C-Data)
 
-import type { ContactCanonical } from '../types';
+import type { ContactCanonical } from "../types.ts";
 
 const OPENAI_EMBEDDINGS_ENDPOINT = 'https://api.openai.com/v1/embeddings';
 const MODEL = 'text-embedding-3-small'; // 1536 dims, $0.02 / 1M tok
@@ -98,7 +98,6 @@ function sleep(ms: number): Promise<void> {
 
 function getEnv(name: string): string | undefined {
   // Supporta sia Deno (edge fn) che Node (Next.js server action)
-  // @ts-expect-error: Deno present in edge runtime
   if (typeof Deno !== 'undefined' && Deno?.env?.get) return Deno.env.get(name);
   if (typeof process !== 'undefined' && process?.env) return process.env[name];
   return undefined;

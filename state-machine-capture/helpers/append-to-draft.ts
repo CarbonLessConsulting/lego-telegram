@@ -4,9 +4,9 @@
 // Append (merge) di una nuova source al draft attivo. Multi-source pattern
 // (voice + photo + text + vcard aggregati in una singola entry).
 
-import { startDraft, type StartDraftDeps } from './start-draft';
-import { loadActiveDraft } from './load-active-draft';
-import type { AppendDraftResult, DraftSourceEntry, StartDraftInput } from '../types';
+import { startDraft, type StartDraftDeps } from "./start-draft.ts";
+import { loadActiveDraft } from "./load-active-draft.ts";
+import type { AppendDraftResult, DraftSourceEntry, StartDraftInput } from "../types.ts";
 
 /**
  * Merger di default: shallow merge (incoming sovrascrive chiavi esistenti
@@ -60,8 +60,10 @@ export async function appendToDraft(
 ): Promise<AppendDraftResult | null> {
   const merger = input.merge ?? defaultMergePayloads;
 
+  // v0.1: SupabaseLike interface mismatch cross-helpers; cast pragmatico, unify in v0.2
   const existing = await loadActiveDraft(
-    { supabase: deps.supabase, table: deps.table },
+    // deno-lint-ignore no-explicit-any
+    { supabase: deps.supabase as any, table: deps.table },
     input.telegram_chat_id,
   );
 

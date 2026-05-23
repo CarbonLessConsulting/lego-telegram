@@ -7,8 +7,8 @@ import type {
   CrmCandidate,
   PrefetchConfig,
   SupabaseLike,
-} from '../types';
-import { DEFAULT_PREFETCH_CONFIG } from '../types';
+} from "../types.ts";
+import { DEFAULT_PREFETCH_CONFIG } from "../types.ts";
 
 /**
  * Escape LIKE wildcard (`_`, `%`) per evitare full-table scan da utente

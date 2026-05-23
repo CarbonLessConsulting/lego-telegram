@@ -1,6 +1,6 @@
 // Brick: telegram-entity-flow-framework v0.1.0 (le-GO I-Domain)
 
-import type { EntityFlowDefinition, FlowStep } from '../types';
+import type { EntityFlowDefinition, FlowStep } from "../types.ts";
 
 /**
  * Registry in-memory di flow definitions, indicizzato per `flow_id`.

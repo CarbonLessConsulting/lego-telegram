@@ -1,7 +1,7 @@
 // Brick: telegram-white-label-runtime v0.1.0 (le-GO C-UI)
 
-import type { TelegramBrandConfig } from '../types';
-import { applyBrandTemplate, buildBrandVars } from './apply-brand-template';
+import type { TelegramBrandConfig } from "../types.ts";
+import { applyBrandTemplate, buildBrandVars } from "./apply-brand-template.ts";
 
 /**
  * Render signature da appendere a un messaggio assistant.

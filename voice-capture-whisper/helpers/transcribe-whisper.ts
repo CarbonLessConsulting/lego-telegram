@@ -105,7 +105,7 @@ export async function transcribeWhisper(
   for (let attempt = 0; attempt < 3; attempt++) {
     // FormData ricreata ad ogni tentativo (i Blob possono essere già letti).
     const fd = new FormData();
-    const blob = new Blob([audioBytes], { type: mimeType });
+    const blob = new Blob([new Uint8Array(audioBytes).buffer as ArrayBuffer], { type: mimeType });
     fd.append("file", blob, filename);
     fd.append("model", WHISPER_MODEL);
     fd.append("response_format", "verbose_json");

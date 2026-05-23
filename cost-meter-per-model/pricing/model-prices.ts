@@ -5,7 +5,7 @@
 // ⚠️ NON inventare prezzi — se aggiungi modelli verifica `source_url` + aggiorna `verified_at`.
 // ⚠️ Whisper: USD/secondo audio (calcolato separatamente).
 
-import type { ModelPricing } from '../types';
+import type { ModelPricing } from "../types.ts";
 
 /**
  * Whisper costo per secondo audio: $0.0001/sec = $0.006/min = $6/1000min.

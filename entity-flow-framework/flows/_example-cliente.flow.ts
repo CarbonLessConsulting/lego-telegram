@@ -5,7 +5,7 @@
 // Esempio CANONICAL: flow di creazione cliente (privato o azienda)
 // con manual-walk + review + commit.
 
-import type { EntityFlowDefinition } from '../types';
+import type { EntityFlowDefinition } from "../types.ts";
 
 export const exampleClienteCreateFlow: EntityFlowDefinition = {
   id: 'example_cliente_create',

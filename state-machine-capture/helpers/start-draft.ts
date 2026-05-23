@@ -3,7 +3,7 @@
 //
 // Crea o sostituisce il draft attivo per chat ATOMICAMENTE via RPC.
 
-import type { AppendDraftResult, DraftRow, StartDraftInput } from '../types';
+import type { AppendDraftResult, DraftRow, StartDraftInput } from "../types.ts";
 
 interface SupabaseLike {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

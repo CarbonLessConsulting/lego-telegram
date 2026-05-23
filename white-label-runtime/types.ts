@@ -1,8 +1,22 @@
 // Donor: ~/Sviluppo/erp/gomyreference/src/lib/brand-config.ts
 // Donor: ~/Sviluppo/erp/gomyreference/supabase/migrations/20260515180000_goref_fase1.sql (goref_tenants.brand_config)
 // Brick: telegram-white-label-runtime v0.1.0 (le-GO C-UI)
+//
+// Inline ReactBrandConfig (estratto dal brick brand-white-label canonical le-GO)
+// per evitare dipendenza cross-brick non pubblicata su JSR.
 
-import type { BrandConfig as ReactBrandConfig } from '../brand-white-label/types';
+interface ReactBrandConfig {
+  app_name?: string;
+  assistant_name?: string;
+  primary_color?: string;
+  accent_color?: string;
+  logo_url?: string;
+  favicon_url?: string;
+  signup_url?: string;
+  support_email?: string;
+  locale_default?: string;
+  [key: string]: unknown;
+}
 
 /**
  * Locale supportate per bot Telegram le-GO.

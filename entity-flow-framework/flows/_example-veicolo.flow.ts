@@ -2,7 +2,7 @@
 // Donor: ~/Sviluppo/erp/gosolution/.../entities/_shared.ts (VEICOLO_SCHEMA)
 // Brick: telegram-entity-flow-framework v0.1.0 (le-GO I-Domain)
 
-import type { EntityFlowDefinition } from '../types';
+import type { EntityFlowDefinition } from "../types.ts";
 
 export const exampleVeicoloQuickFlow: EntityFlowDefinition = {
   id: 'example_veicolo_quick',

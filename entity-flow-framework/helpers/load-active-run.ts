@@ -1,7 +1,7 @@
 // Brick: telegram-entity-flow-framework v0.1.0 (le-GO I-Domain)
 
-import type { FlowEngineConfig, FlowRunRow, SupabaseLike } from '../types';
-import { DEFAULT_ENGINE_CONFIG } from '../types';
+import type { FlowEngineConfig, FlowRunRow, SupabaseLike } from "../types.ts";
+import { DEFAULT_ENGINE_CONFIG } from "../types.ts";
 
 /**
  * Carica il flow run attivo per (tenant_id, telegram_chat_id, entity_type).

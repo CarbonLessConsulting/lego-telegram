@@ -47,7 +47,7 @@ export async function editMessageText(
     text,
     parse_mode: opts.parse_mode ?? "HTML",
     disable_web_page_preview: opts.disable_web_page_preview ?? true,
-    ...(opts.reply_markup && { reply_markup: opts.reply_markup }),
+    ...(opts.reply_markup ? { reply_markup: opts.reply_markup as Record<string, unknown> } : {}),
   };
 
   const maxAttempts = opts.max_attempts ?? 3;
