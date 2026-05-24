@@ -1,6 +1,6 @@
 {
   "name": "@goai/lego-telegram",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "license": "MIT",
   "exports": {
     ".": "./mod.ts",
@@ -17,7 +17,8 @@
     "./crm-prefetch-lookup": "./crm-prefetch-lookup/index.ts",
     "./entity-flow-framework": "./entity-flow-framework/index.ts",
     "./bot-snapshot-test": "./bot-snapshot-test/index.ts",
-    "./llm-router-multi-provider": "./llm-router-multi-provider/index.ts"
+    "./llm-router-multi-provider": "./llm-router-multi-provider/index.ts",
+    "./llm-usage-interceptor": "./llm-usage-interceptor/index.ts"
   },
   "publish": {
     "include": [

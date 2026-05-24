@@ -1,0 +1,29 @@
+{
+  "brick": "llm-usage-interceptor",
+  "version": "0.3.0",
+  "category": "G-Ops",
+  "security_baseline": {
+    "secret_management": "API keys del provider rimangono in env vars del chiamante (mai logged). Brick gestisce solo service_role Supabase per insert.",
+    "input_validation": "Drop-in fetch wrapper: tutta la validazione resta al provider chiamato. Body request non modificato.",
+    "fail_safe": "Insert fail (DB down, RLS error) -> log warning + continue. La response del provider torna SEMPRE al chiamante. Errori non bloccano il flusso applicativo.",
+    "append_only": "Tabella llm_usage_costs no UPDATE/DELETE da role non-service. Audit forense permanente.",
+    "no_pii_leak": "Brick NON logga messages content. Solo metadata: provider/model/tokens/cost/duration/edge_function/operation/task_type."
+  },
+  "compliance_eu_ai_act": {
+    "article_50_transparency": "Brick non genera contenuti AI: log layer. Responsabilità disclosure resta al bot chiamante.",
+    "audit_trail": "Ogni call AI Sofia/Sara loggata permanente con timestamp, provider, model, tokens. Soddisfa requisito Annex IV documentation."
+  },
+  "gdpr": {
+    "lawful_basis": "Legittimo interesse agency (audit costi + anti-frode). Niente dato personale processato dall'interceptor.",
+    "retention": "Append-only. Policy retention DB-level (default permanente, override per cliente sovereign in DPA)."
+  },
+  "tests_required": [
+    "interceptedFetch logga riga su llm_usage_costs per call success",
+    "interceptedFetch logga riga con success=false e error_message per HTTP 4xx/5xx",
+    "interceptedFetch NON throw quando DB insert fallisce (degrade graceful)",
+    "interceptedFetch re-throw quando network error originale",
+    "Response body del chiamante NON consumato dall'interceptor (clone funziona)",
+    "Auto-detect provider corretto per ogni URL endpoint LLM",
+    "Pricing lookup fallback graceful per modello sconosciuto (cost=0 + metadata flag)"
+  ]
+}

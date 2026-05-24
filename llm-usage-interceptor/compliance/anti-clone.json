@@ -1,0 +1,63 @@
+{
+  "brick": "llm-usage-interceptor",
+  "version": "0.3.0",
+  "last_review": "2026-05-24",
+  "question": "Se qualcuno volesse fare oggi questo brick MEGLIO di noi, cosa aggiungerebbe?",
+  "competitors_known": [
+    {
+      "name": "Helicone",
+      "url": "https://helicone.ai",
+      "strength": "Proxy SaaS che intercetta call LLM, dashboard, alerts. 1-line drop-in via Bearer header",
+      "weakness": "SaaS terzo (privacy concerns), latenza extra +20ms, lock-in dashboard proprietaria, GDPR processor extra"
+    },
+    {
+      "name": "Langfuse",
+      "url": "https://langfuse.com",
+      "strength": "Open source self-host, tracing dettagliato, LLM eval, prompt management",
+      "weakness": "Tooling Python-first (TypeScript SDK secondario), pesa infra (Postgres+Clickhouse+Redis), overhead per piccola agency"
+    },
+    {
+      "name": "PostHog LLM observability",
+      "url": "https://posthog.com/docs/ai-engineering",
+      "strength": "Integrato con product analytics, schema event-based",
+      "weakness": "Generalista, non specifico LLM cost-accounting, no cost calc native"
+    },
+    {
+      "name": "OpenLLMetry (Traceloop)",
+      "url": "https://www.traceloop.com/openllmetry",
+      "strength": "OpenTelemetry-based, vendor-neutral, integra con qualsiasi APM",
+      "weakness": "OTel pipeline complessa per use-case agency mini, no cost-billing focus"
+    }
+  ],
+  "what_competitor_would_add": [
+    "Streaming response support (parser incrementale chunk-by-chunk)",
+    "Prompt logging opzionale + redaction PII automatica",
+    "Latency budget alerts (p99 spike detection)",
+    "Sampling configurabile per ridurre volume DB (1/100 calls a basso traffico)",
+    "Distributed tracing (correlation ID propagation cross-edge-fn)",
+    "Multi-tier storage (hot Postgres recent + cold archive S3 90gg+)",
+    "Replay testing (cattura -> rigioca su nuovo modello per regression)",
+    "Eval-on-the-fly (LLM-as-judge per quality score)",
+    "Budget enforcement runtime (block call se tenant supera quota)",
+    "Webhook su anomalie (cost spike, error rate, rate-limit upstream)"
+  ],
+  "what_we_already_do_better": [
+    "ZERO LEAK garantito: insert sync con response, no fire-and-forget",
+    "Deno-native + JSR-publishable (no npm deps, edge-function ready)",
+    "Stesso DB del project (no HTTP cross-project = no failure mode)",
+    "Cost calc nativo (no servizio esterno per fatturazione cliente)",
+    "Tabella append-only RLS-protetta (audit forense permanente)",
+    "Drop-in replacement: 1 sostituzione per ogni call esistente",
+    "Multi-mode (chat, embeddings, audio, image gen) in singolo brick",
+    "Pricing table embedded versionata (no API lookup runtime)",
+    "Integra con cost-meter-per-model + llm-router-multi-provider (stack le-GO coerente)"
+  ],
+  "roadmap_v0_4_0": [
+    "Streaming SSE parser incrementale",
+    "Budget cap enforcement runtime (handshake check_tenant_quota)",
+    "Webhook alert su anomalie (Telegram CEO notify)",
+    "Sampling configurabile + auto-tune per traffico alto",
+    "Prompt redaction PII opzionale"
+  ],
+  "speed_to_include": "Q3 2026 streaming + budget enforcement; Q4 2026 alerting + sampling."
+}
