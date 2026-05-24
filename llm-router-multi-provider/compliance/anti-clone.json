@@ -1,0 +1,57 @@
+{
+  "brick": "llm-router-multi-provider",
+  "version": "0.2.0",
+  "last_review": "2026-05-24",
+  "question": "Se qualcuno volesse fare oggi questo brick MEGLIO di noi, cosa aggiungerebbe?",
+  "competitors_known": [
+    {
+      "name": "LiteLLM",
+      "url": "https://github.com/BerriAI/litellm",
+      "strength": "100+ provider, Python ecosystem, gateway proxy mode",
+      "weakness": "Python-only, no Deno-native, no edge-function deploy, no task-type semantic routing (solo model dispatch)"
+    },
+    {
+      "name": "OpenRouter",
+      "url": "https://openrouter.ai",
+      "strength": "Unified billing, 200+ modelli, transparent pricing",
+      "weakness": "Aggiunge 5-10% margine sopra prezzo base, latenza extra +50ms, no logica task-aware nostra"
+    },
+    {
+      "name": "Portkey",
+      "url": "https://portkey.ai",
+      "strength": "AI gateway con load balancing + caching",
+      "weakness": "SaaS proprietario, no JSR-native, lock-in piattaforma"
+    }
+  ],
+  "what_competitor_would_add": [
+    "Latency-aware routing (storia p50/p95 per provider+modello)",
+    "Quality-aware routing (eval automatica con LLM-as-judge per task)",
+    "Adaptive routing (RL feedback: se utente rifa la domanda -> downvote)",
+    "Smart caching (semantic cache + KV per query identiche/simili)",
+    "Multi-region failover (Mistral FR -> Mistral La Plateforme EU -> Mistral OVHcloud BE)",
+    "Streaming SSE pass-through (oggi solo non-streaming)",
+    "Token counting client-side prima della call (evita overage)",
+    "Budget caps per tenant integrati nativi (oggi delegato a cost-meter-per-model)",
+    "Multimodal routing (audio/image/video task types)",
+    "Self-host provider plug-in (vLLM, Ollama, llama.cpp)"
+  ],
+  "what_we_already_do_better": [
+    "Deno-native + JSR-publishable (no npm dependency hell)",
+    "Edge-function ready (Supabase, Vercel Edge, Cloudflare Workers)",
+    "Task-type semantic routing (non solo model dispatch)",
+    "EU residency flag dichiarativo per clienti sovereign",
+    "Fallback chain automatica per ogni task type",
+    "Integrato con cost-meter-per-model brick (telemetria centralizzata)",
+    "Zero lock-in: ogni provider chiamato via API ufficiale diretta",
+    "Override force_provider+force_model per A/B testing controllato"
+  ],
+  "roadmap_v0_3_0": [
+    "Streaming SSE support (chunk callback)",
+    "Latency-aware re-ranking (warm cache di p50 per route)",
+    "Semantic cache opzionale (KV-backed)",
+    "Self-host adapter (Ollama base_url)",
+    "Multimodal task types (vision_ocr, audio_transcribe)",
+    "Tenant budget cap integration (cost-meter handshake)"
+  ],
+  "speed_to_include": "Q3 2026 streaming + semantic cache; Q4 2026 self-host adapter."
+}

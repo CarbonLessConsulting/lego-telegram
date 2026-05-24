@@ -1,0 +1,27 @@
+{
+  "brick": "llm-router-multi-provider",
+  "version": "0.2.0",
+  "category": "B-Sofia-Core",
+  "security_baseline": {
+    "secret_management": "API keys via env vars (mai hardcoded). Brick non logga mai il valore della key.",
+    "data_residency_flag": "ctx.data_residency='eu_strict' filtra provider non-EU. Default 'any'.",
+    "input_validation": "messages array OpenAI-compatible standard; no execution arbitraria.",
+    "fail_safe": "Throw esplicito quando tutti i provider falliscono; chiamante decide retry/fallback applicativo.",
+    "no_pii_leak": "Brick non persiste contenuto messaggi; solo metadati (provider, model, tokens, duration). Logging contenuto = responsabilità chiamante (cost-meter, audit log)."
+  },
+  "compliance_eu_ai_act": {
+    "transparency_article_50": "Brick non genera disclosure: responsabilità del bot chiamante (vedi push-soft + welcome message).",
+    "high_risk_classification": "Router non genera decisioni autonome ad alto rischio (Annex III postponed Dec 2027). Marca task_type per ogni call permette audit ex-post."
+  },
+  "gdpr": {
+    "data_processors_declared": "openai (US, SCC), anthropic (US, SCC), deepseek (CN, sconsigliato per dati personali UE), mistral (FR, GDPR-native), groq (US, SCC), cerebras (US, SCC), fireworks (US, SCC).",
+    "recommendation": "Per processing dati personali UE -> usare flag data_residency=eu_strict (filtra solo Mistral)."
+  },
+  "tests_required": [
+    "selectRoute torna primary per task supportato + provider disponibile",
+    "selectRoute throw se nessun provider disponibile",
+    "selectRoute filtra non-EU quando eu_strict",
+    "callLLM fallback al secondo candidato se primo throw 5xx",
+    "callLLM dispatch corretto provider OpenAI-compatible vs Anthropic"
+  ]
+}
