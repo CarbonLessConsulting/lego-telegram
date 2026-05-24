@@ -34,7 +34,6 @@ export const PRICING: Record<string, ModelPrice> = {
   "deepseek-coder": { input_per_mtok: 0.14, output_per_mtok: 0.28 },
   "deepseek-reasoner": { input_per_mtok: 0.55, output_per_mtok: 2.19 },
   "deepseek-v4-flash": { input_per_mtok: 0.14, output_per_mtok: 0.28 },
-  "deepseek-v4-pro": { input_per_mtok: 0.9, output_per_mtok: 0.9 },
   "deepseek-v3": { input_per_mtok: 0.14, output_per_mtok: 0.28 },
   "deepseek-v3.2": { input_per_mtok: 0.14, output_per_mtok: 0.28 },
 
