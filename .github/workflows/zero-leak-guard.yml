@@ -1,0 +1,72 @@
+name: ZERO TOKEN LEAK guard
+
+# 🚨 BLOCCA PR CHE INTRODUCONO CHIAMATE LLM SENZA TRACKING 🚨
+#
+# Regola Giuseppe 24/05/2026 (CANONICAL_PRICING §4.1-BIS).
+# Ogni call verso api.anthropic.com / api.openai.com / api.deepseek.com /
+# api.mistral.ai / api.groq.com / api.cerebras.ai / api.fireworks.ai /
+# generativelanguage.googleapis.com DEVE passare per:
+#   - jsr:@goai/lego-telegram@^0.3.0/llm-usage-interceptor (fetchLLM/fetchSmart)
+#   - OPPURE jsr:@goai/lego-telegram@^0.3.0/llm-router-multi-provider
+#
+# Mai più `fetch("https://api.<provider>.com/...")` raw.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  zero-leak-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Scan for raw fetch to LLM APIs
+        run: |
+          set -e
+          echo "🔍 Scanning for raw fetch() calls to LLM APIs..."
+
+          # Pattern: fetch(" or fetch(' or fetch(` seguito da https:// e dominio LLM
+          PATTERN='fetch\(["`'"'"']https://(api\.(anthropic|openai|deepseek|mistral|groq|cerebras|fireworks)\.com|generativelanguage\.googleapis\.com)'
+
+          # Exclude paths:
+          # - node_modules
+          # - .git
+          # - tests / smoke / migrations
+          # - llm-tracked.ts (the helper itself)
+          # - llm-usage-interceptor (the brick itself, in lego-telegram repo)
+          # - llm-router-multi-provider (the brick itself, in lego-telegram repo)
+          # - audit reports / docs
+
+          HITS=$(grep -rnE "$PATTERN" \
+            --include="*.ts" --include="*.tsx" --include="*.js" --include="*.mjs" \
+            . 2>/dev/null \
+            | grep -v "node_modules/" \
+            | grep -v "\.git/" \
+            | grep -v "/llm-tracked\.ts" \
+            | grep -v "/llm-usage-interceptor/" \
+            | grep -v "/llm-router-multi-provider/" \
+            | grep -v "/migrations/" \
+            | grep -v "/_audits/" \
+            || true)
+
+          if [ -n "$HITS" ]; then
+            echo ""
+            echo "❌ ZERO TOKEN LEAK GUARD: violazione rilevata"
+            echo ""
+            echo "Le seguenti chiamate fetch() raw verso API LLM NON sono permesse:"
+            echo ""
+            echo "$HITS"
+            echo ""
+            echo "FIX: sostituisci con fetchLLM o fetchSmart da _shared/llm-tracked.ts"
+            echo "(che usa jsr:@goai/lego-telegram@^0.3.0/llm-usage-interceptor)."
+            echo ""
+            echo "Vedi CANONICAL_PRICING.md §4.1-BIS + REGOLE_TEAM.md §4.0."
+            exit 1
+          fi
+
+          echo "✅ Nessuna chiamata LLM raw rilevata. Zero leak garantito."
